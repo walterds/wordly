@@ -31,12 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Event Listeners
         document.getElementById('daily-challenge-btn').addEventListener('click', () => setGameMode('daily'));
-        document.getElementById('infinite-play-btn').addEventListener('click', () => setGameMode('infinite'));
         document.getElementById('stats-btn').addEventListener('click', showStats);
         document.addEventListener('keydown', handleKeyPress);
         keyboardContainer.addEventListener('click', handleKeyPress);
 
-        setGameMode('infinite'); // Default mode
+        setGameMode('daily'); // Default mode
     }
 
     function setGameMode(mode) {
@@ -269,10 +268,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Event Listeners
         document.getElementById('daily-challenge-btn').addEventListener('click', () => setGameMode('daily'));
-        document.getElementById('infinite-play-btn').addEventListener('click', () => setGameMode('infinite'));
+        document.getElementById('stats-btn').addEventListener('click', showStats);
         document.addEventListener('keydown', handleKeyPress);
         keyboardContainer.addEventListener('click', handleKeyPress);
 
-        setGameMode('infinite'); // Default mode
+        setGameMode('daily'); // Default mode
     })();
 });

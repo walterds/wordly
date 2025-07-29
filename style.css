@@ -1,7 +1,13 @@
-@keyframes fadeInOut {
-    0% { opacity: 0; }
-    50% { opacity: 1; }
-    100% { opacity: 0; }
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-30px);
+    }
+    60% {
+        transform: translateY(-15px);
+    }
 }
 
 #splash-screen {
@@ -10,9 +16,12 @@
     align-items: center;
     height: 100vh;
     background-color: #f7f7f7;
+}
+
+#splash-screen h1 {
     font-size: 3em;
     color: #333;
-    animation: fadeInOut 2s ease-in-out;
+    animation: bounce 2s ease;
 }
 
 :root {
@@ -159,7 +168,7 @@ header h1 {
 }
 
 .tile.flip {
-    transform: rotateX(180deg);
+    transform: rotateY(180deg);
 }
 
 .tile.filled {
