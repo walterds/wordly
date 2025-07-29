@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const splashScreen = document.getElementById('splash-screen');
+    const gameContainer = document.getElementById('game-container');
+
+    setTimeout(() => {
+        splashScreen.style.display = 'none';
+        gameContainer.style.display = 'flex';
+    }, 3000);
+
     const boardContainer = document.getElementById('board-container');
     const keyboardContainer = document.getElementById('keyboard-container');
 
@@ -24,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Event Listeners
         document.getElementById('daily-challenge-btn').addEventListener('click', () => setGameMode('daily'));
         document.getElementById('infinite-play-btn').addEventListener('click', () => setGameMode('infinite'));
+        document.getElementById('stats-btn').addEventListener('click', showStats);
         document.addEventListener('keydown', handleKeyPress);
         keyboardContainer.addEventListener('click', handleKeyPress);
 
@@ -158,18 +167,69 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         setTimeout(() => {
-            currentRow++;
-            currentGuess = [];
-
             if (guess === targetWord) {
+                updateStats(true, currentRow + 1);
                 alert('¡Felicidades! Has adivinado la palabra.');
                 isGameOver = true;
-            } else if (currentRow === maxGuesses) {
+                showStats();
+            } else if (currentRow + 1 === maxGuesses) {
+                updateStats(false);
                 alert(`Fin del juego. La palabra era ${targetWord}.`);
                 isGameOver = true;
+                showStats();
             }
+
+            currentRow++;
+            currentGuess = [];
         }, wordLength * 300);
     }
+
+    const statsModal = document.getElementById('stats-modal');
+    const statsContainer = document.getElementById('stats-container');
+    const closeBtn = document.querySelector('.close-btn');
+
+    let stats = JSON.parse(localStorage.getItem('wordle-stats')) || {
+        wins: 0,
+        losses: 0,
+        distribution: [0, 0, 0, 0, 0, 0]
+    };
+
+    function updateStats(didWin, guessCount) {
+        if (didWin) {
+            stats.wins++;
+            stats.distribution[guessCount - 1]++;
+        } else {
+            stats.losses++;
+        }
+        localStorage.setItem('wordle-stats', JSON.stringify(stats));
+    }
+
+    function showStats() {
+        statsContainer.innerHTML = `
+            <p>Victorias: ${stats.wins}</p>
+            <p>Derrotas: ${stats.losses}</p>
+            <h3>Distribución de Victorias:</h3>
+            <div class="chart">
+                ${stats.distribution.map((count, i) => `
+                    <div class="bar-container">
+                        <span class="bar-label">${i + 1}</span>
+                        <div class="bar" style="width: ${count > 0 ? (count / Math.max(...stats.distribution) * 100) : 0}%">${count}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        statsModal.style.display = 'block';
+    }
+
+    closeBtn.onclick = () => {
+        statsModal.style.display = 'none';
+    };
+
+    window.onclick = (event) => {
+        if (event.target == statsModal) {
+            statsModal.style.display = 'none';
+        }
+    };
 
     function updateKeyStatus(key, status) {
         const keyElement = document.querySelector(`[data-key="${key}"]`);
