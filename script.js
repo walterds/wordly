@@ -1,0 +1,218 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const boardContainer = document.getElementById('board-container');
+    const keyboardContainer = document.getElementById('keyboard-container');
+
+    // Game variables
+    const wordLength = 5;
+    const maxGuesses = 6;
+    let currentGuess = [];
+    let currentRow = 0;
+    let targetWord = '';
+    let isGameOver = false;
+
+    const keys = [
+        ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
+        ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ñ'],
+        ['enter', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'del']
+    ];
+
+    let gameMode = 'infinite'; // 'daily' or 'infinite'
+
+    function init() {
+        // ... (init code before event listeners)
+
+        // Event Listeners
+        document.getElementById('daily-challenge-btn').addEventListener('click', () => setGameMode('daily'));
+        document.getElementById('infinite-play-btn').addEventListener('click', () => setGameMode('infinite'));
+        document.addEventListener('keydown', handleKeyPress);
+        keyboardContainer.addEventListener('click', handleKeyPress);
+
+        setGameMode('infinite'); // Default mode
+    }
+
+    function setGameMode(mode) {
+        gameMode = mode;
+        resetGame();
+    }
+
+    function getDailyWord() {
+        const startDate = new Date('2024-01-01');
+        const today = new Date();
+        const diffTime = Math.abs(today - startDate);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const wordIndex = diffDays % dictionary.es.length;
+        return dictionary.es[wordIndex];
+    }
+
+    function resetGame() {
+        // Clear board
+        boardContainer.innerHTML = '';
+        for (let i = 0; i < maxGuesses; i++) {
+            const row = document.createElement('div');
+            row.className = 'row';
+            for (let j = 0; j < wordLength; j++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                row.appendChild(tile);
+            }
+            boardContainer.appendChild(row);
+        }
+
+        // Reset keys
+        const keys = keyboardContainer.querySelectorAll('.key');
+        keys.forEach(key => {
+            key.classList.remove('correct', 'misplaced', 'incorrect');
+        });
+
+        // Select a new word based on game mode
+        if (gameMode === 'daily') {
+            targetWord = getDailyWord();
+        } else {
+            targetWord = dictionary.es[Math.floor(Math.random() * dictionary.es.length)];
+        }
+        console.log(`Target word: ${targetWord}`); // For debugging
+
+        // Reset game state
+        currentGuess = [];
+        currentRow = 0;
+        isGameOver = false;
+    }
+
+    function handleKeyPress(e) {
+        if (isGameOver) return;
+
+        const key = e.type === 'keydown' ? e.key.toLowerCase() : e.target.dataset.key;
+
+        if (key === 'enter' && currentGuess.length === wordLength) {
+            submitGuess();
+        } else if (key === 'del' || key === 'backspace') {
+            deleteLetter();
+        } else if (key.match(/^[a-zñ]$/) && currentGuess.length < wordLength) {
+            addLetter(key);
+        }
+    }
+
+    function addLetter(letter) {
+        currentGuess.push(letter);
+        const row = boardContainer.children[currentRow];
+        const tile = row.children[currentGuess.length - 1];
+        tile.textContent = letter;
+        tile.classList.add('filled');
+    }
+
+    function deleteLetter() {
+        if (currentGuess.length === 0) return;
+        const row = boardContainer.children[currentRow];
+        const tile = row.children[currentGuess.length - 1];
+        tile.textContent = '';
+        tile.classList.remove('filled');
+        currentGuess.pop();
+    }
+
+    function submitGuess() {
+        const guess = currentGuess.join('');
+
+        if (!dictionary.es.includes(guess)) {
+            alert('Palabra no encontrada en el diccionario.');
+            return;
+        }
+
+        const row = boardContainer.children[currentRow];
+        const guessLetters = guess.split('');
+        const targetLetters = targetWord.split('');
+
+        const colors = Array(wordLength).fill('');
+
+        // Mark correct letters (green)
+        for (let i = 0; i < wordLength; i++) {
+            if (guessLetters[i] === targetLetters[i]) {
+                colors[i] = 'correct';
+                updateKeyStatus(guessLetters[i], 'correct');
+                targetLetters[i] = null;
+            }
+        }
+
+        // Mark misplaced (yellow) and incorrect (gray) letters
+        for (let i = 0; i < wordLength; i++) {
+            if (colors[i] === 'correct') continue;
+
+            if (targetLetters.includes(guessLetters[i])) {
+                colors[i] = 'misplaced';
+                updateKeyStatus(guessLetters[i], 'misplaced');
+                targetLetters[targetLetters.indexOf(guessLetters[i])] = null;
+            } else {
+                colors[i] = 'incorrect';
+                updateKeyStatus(guessLetters[i], 'incorrect');
+            }
+        }
+
+        // Animate the tiles
+        for (let i = 0; i < wordLength; i++) {
+            setTimeout(() => {
+                row.children[i].classList.add('flip');
+                setTimeout(() => {
+                    row.children[i].classList.add(colors[i]);
+                }, 250);
+            }, i * 300);
+        }
+
+
+        setTimeout(() => {
+            currentRow++;
+            currentGuess = [];
+
+            if (guess === targetWord) {
+                alert('¡Felicidades! Has adivinado la palabra.');
+                isGameOver = true;
+            } else if (currentRow === maxGuesses) {
+                alert(`Fin del juego. La palabra era ${targetWord}.`);
+                isGameOver = true;
+            }
+        }, wordLength * 300);
+    }
+
+    function updateKeyStatus(key, status) {
+        const keyElement = document.querySelector(`[data-key="${key}"]`);
+        if (!keyElement) return;
+
+        const currentStatus = keyElement.classList.contains('correct') ? 'correct'
+                            : keyElement.classList.contains('misplaced') ? 'misplaced'
+                            : '';
+
+        if (status === 'correct' || (status === 'misplaced' && currentStatus !== 'correct')) {
+            keyElement.classList.remove('misplaced', 'incorrect');
+            keyElement.classList.add(status);
+        } else if (status === 'incorrect' && !currentStatus) {
+            keyElement.classList.add(status);
+        }
+    }
+
+    // Initial setup
+    (function() {
+        // Create keyboard
+        keyboardContainer.innerHTML = '';
+        keys.forEach(row => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'keyboard-row';
+            row.forEach(key => {
+                const keyButton = document.createElement('button');
+                keyButton.className = 'key';
+                keyButton.textContent = key;
+                keyButton.setAttribute('data-key', key);
+                if (key === 'enter' || key === 'del') {
+                    keyButton.classList.add('large');
+                }
+                rowDiv.appendChild(keyButton);
+            });
+            keyboardContainer.appendChild(rowDiv);
+        });
+
+        // Event Listeners
+        document.getElementById('daily-challenge-btn').addEventListener('click', () => setGameMode('daily'));
+        document.getElementById('infinite-play-btn').addEventListener('click', () => setGameMode('infinite'));
+        document.addEventListener('keydown', handleKeyPress);
+        keyboardContainer.addEventListener('click', handleKeyPress);
+
+        setGameMode('infinite'); // Default mode
+    })();
+});
