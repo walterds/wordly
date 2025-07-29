@@ -1,3 +1,9 @@
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
 #splash-screen {
     display: flex;
     justify-content: center;
@@ -6,6 +12,7 @@
     background-color: #f7f7f7;
     font-size: 3em;
     color: #333;
+    animation: fadeInOut 2s ease-in-out;
 }
 
 :root {

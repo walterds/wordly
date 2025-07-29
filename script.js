@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         splashScreen.style.display = 'none';
         gameContainer.style.display = 'flex';
-    }, 3000);
+    }, 2000);
 
     const boardContainer = document.getElementById('board-container');
     const keyboardContainer = document.getElementById('keyboard-container');
