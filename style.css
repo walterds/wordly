@@ -87,6 +87,35 @@ body {
     cursor: pointer;
 }
 
+#stats-container {
+    padding: 20px;
+}
+
+.chart {
+    margin-top: 20px;
+}
+
+.bar-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.bar-label {
+    width: 20px;
+    text-align: right;
+    margin-right: 10px;
+}
+
+.bar {
+    height: 20px;
+    background-color: var(--correct-color);
+    color: white;
+    text-align: right;
+    padding-right: 5px;
+    line-height: 20px;
+}
+
 header {
     text-align: center;
     border-bottom: 1px solid #ccc;
